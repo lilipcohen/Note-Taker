@@ -19,8 +19,22 @@ app.get("*", function(req, res) {
 });
 
 app.get("/api/notes", function(req, res) {
-    return res.json(title);
+    return res.json(newNote);
     // return res.json(text);
+});
+
+app.get("/api/notes/:id", function(req, res) {
+  var chosen = req.params.character;
+
+  console.log(chosen);
+
+  for (var i = 0; i < notes.length; i++) {
+    if (chosen === notes[i].routeName) {
+      return res.json(notes[i]);
+    }
+  }
+
+  return res.json(false);
 });
 
 app.post("/api/notes", function(req, res) {
@@ -29,24 +43,22 @@ app.post("/api/notes", function(req, res) {
 
   console.log(newNote);
 
-  characters.push(newNote);
+  notes.push(newNote);
 
   res.json(newNote);
 });
 
-// app.get("/api/characters/:character", function(req, res) {
-//   var chosen = req.params.character;
+let data = JSON.stringify(title);
 
-//   console.log(chosen);
+function writeToFile(fileName, data) {
+    fs.writeFileSync(`db.json`, data);
+}
 
-//   for (var i = 0; i < characters.length; i++) {
-//     if (chosen === characters[i].routeName) {
-//       return res.json(characters[i]);
-//     }
-//   }
-
-//   return res.json(false);
-// });
+fs.readFile('db.json', (err, data) => {
+    if (err) throw err;
+    let newNote = JSON.parse(data);
+    console.log(title);
+});
 
 app.listen(PORT, function() {
   console.log("App listening on PORT " + PORT);
