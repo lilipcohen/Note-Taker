@@ -1,64 +1,67 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
-// const { title } = require("process");
-// const { text } = require("express");
+const notes = require("./db/db.json");
 
 const app = express();
-const PORT = process.env.PORT || 8080;; 
+const PORT = process.env.PORT || 8080; 
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+app.use(express.static("public"));
 
 app.get("/notes", function(req, res) {
   res.sendFile(path.join(__dirname, "./public/notes.html"));
+});
+
+
+app.get("/api/notes", function (req, res) {
+  console.log(notes)
+  res.json(notes)
+});
+
+app.delete("/api/notes/:id", function(req, res) {
+  var chosenId = req.params.id;
+  
+  const noteIndex = notes.findIndex(note => note.id === chosenId)
+  
+  if(noteIndex !== -1) {
+    notes.splice(noteIndex,1)
+    
+    writeToFile('./db/db.json', JSON.stringify(notes))
+  }
+  
+  return res.json(true);
+});
+
+app.post("/api/notes", function(req, res) {
+  
+  /**
+   * {
+   *   title: 'Test note',
+   *   text: 'Test details',
+   *   id: '1245292'
+   * }
+   */
+  var newNote = {
+    ...req.body,
+    id: Date.now().toString()
+  };
+  
+  notes.push(newNote);
+  
+  writeToFile('./db/db.json', JSON.stringify(notes))
+  
+  res.json(newNote);
 });
 
 app.get("*", function(req, res) {
   res.sendFile(path.join(__dirname, "./public/index.html"));
 });
 
-app.get("/api/notes", function(req, res) {
-    return res.json(newNote);
-    // return res.json(text);
-});
-
-app.get("/api/notes/:id", function(req, res) {
-  var chosen = req.params.character;
-
-  console.log(chosen);
-
-  for (var i = 0; i < notes.length; i++) {
-    if (chosen === notes[i].routeName) {
-      return res.json(notes[i]);
-    }
-  }
-
-  return res.json(false);
-});
-
-app.post("/api/notes", function(req, res) {
-
-  var newNote = req.body;
-
-  console.log(newNote);
-
-  notes.push(newNote);
-
-  res.json(newNote);
-});
-
-let data = JSON.stringify(title);
-
 function writeToFile(fileName, data) {
-    fs.writeFileSync(`db.json`, data);
+  fs.writeFileSync(fileName, data);
 }
-
-fs.readFile('db.json', (err, data) => {
-    if (err) throw err;
-    let newNote = JSON.parse(data);
-    console.log(title);
-});
 
 app.listen(PORT, function() {
   console.log("App listening on PORT " + PORT);
