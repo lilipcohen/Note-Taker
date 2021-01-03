@@ -1,17 +1,17 @@
 const express = require("express");
 const path = require("path");
 const fs = require("fs");
-const notes = require("./db/db.json");
+const notes = require("./Develop/db/db.json");
 
 const app = express();
 var PORT = process.env.PORT || 8080; 
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(express.static("public"));
+app.use(express.static("Develop/public"));
 
 app.get("/notes", function(req, res) {
-  res.sendFile(path.join(__dirname, "./public/notes.html"));
+  res.sendFile(path.join(__dirname, "Develop/public/notes.html"));
 });
 
 
@@ -28,7 +28,7 @@ app.delete("/api/notes/:id", function(req, res) {
   if(noteIndex !== -1) {
     notes.splice(noteIndex,1)
     
-    writeToFile('./db/db.json', JSON.stringify(notes))
+    writeToFile('Develop/db/db.json', JSON.stringify(notes))
   }
   
   return res.json(true);
@@ -50,13 +50,13 @@ app.post("/api/notes", function(req, res) {
   
   notes.push(newNote);
   
-  writeToFile('./db/db.json', JSON.stringify(notes))
+  writeToFile('Develop/db/db.json', JSON.stringify(notes))
   
   res.json(newNote);
 });
 
 app.get("/", function(req, res) {
-  res.sendFile(path.join(__dirname, "./public/index.html"));
+  res.sendFile(path.join(__dirname, "Develop/public/index.html"));
 });
 
 function writeToFile(fileName, data) {
